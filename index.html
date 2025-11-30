@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="hu">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MatFizHub - Kezdőlap</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    
+
     <style>
         /* --- STÍLUS BEÁLLÍTÁSOK (CSS) --- */
-        
+
         :root {
             /* Színpaletta */
             --primary-grad-start: #4facfe;
@@ -17,8 +18,10 @@
             --text-light: #636e72;
             --bg-color: #f0f2f5;
             --card-bg: #ffffff;
-            --accent-matek: #ff7675; /* Pirosas a matekhoz */
-            --accent-fizika: #ffeaa7; /* Sárgás a fizikához */
+            --accent-matek: #ff7675;
+            /* Pirosas a matekhoz */
+            --accent-fizika: #ffeaa7;
+            /* Sárgás a fizikához */
         }
 
         body {
@@ -47,7 +50,7 @@
             font-size: 3.5rem;
             font-weight: 800;
             letter-spacing: -1px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         header p {
@@ -96,7 +99,7 @@
             padding: 30px;
             text-decoration: none;
             color: inherit;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             display: flex;
             flex-direction: column;
@@ -108,7 +111,7 @@
         /* Kártya hover animáció */
         .card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
             border-color: var(--primary-grad-start);
         }
 
@@ -133,7 +136,8 @@
             color: var(--text-light);
             font-size: 0.95rem;
             margin: 0 0 25px 0;
-            flex-grow: 1; /* Ez tolja le a gombot az aljára */
+            flex-grow: 1;
+            /* Ez tolja le a gombot az aljára */
         }
 
         .btn {
@@ -164,11 +168,17 @@
 
         /* --- MOBIL NÉZET --- */
         @media (max-width: 600px) {
-            header h1 { font-size: 2.5rem; }
-            .card { padding: 20px; }
+            header h1 {
+                font-size: 2.5rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -180,15 +190,22 @@
 
         <h2 class="section-title">📐 Matematika</h2>
         <div class="grid">
-            
+
             <a href="tortmano.html" class="card">
                 <div class="card-icon" style="background-color: #fff0f0;">🍕</div>
                 <h3>Törtmanó</h3>
-                <p>Gyakorló feladatok és műveletek gyakorlása 6. osztályosoknak.</p>
+                <p>Ismerkedj meg a törtek világával! Játékos feladatok és műveletek gyakorlása 6. osztályosoknak.</p>
                 <div class="btn">Indítás</div>
             </a>
 
-            </div>
+            <a href="tortmano-teszt.html" class="card">
+                <div class="card-icon" style="background-color: #fff0f0;">💯</div>
+                <h3>Törtmanó Teszt</h3>
+                <p>Felmérő a törtek témaköréből. Lássuk, mennyire sikerült elsajátítani az anyagot!</p>
+                <div class="btn">Teszt indítása</div>
+            </a>
+
+        </div>
 
         <h2 class="section-title">⚡ Fizika</h2>
         <div class="grid">
@@ -217,4 +234,5 @@
     </footer>
 
 </body>
+
 </html>
