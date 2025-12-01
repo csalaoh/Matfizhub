@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Törtmanó Teszt - Felmérő</title>
+    <title>Törtmanó Teszt - Biztonságos</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,6 +31,7 @@
             text-align: center;
             max-width: 900px;
             width: 100%;
+            position: relative;
         }
 
         /* --- KÉPERNYŐK --- */
@@ -59,6 +60,57 @@
             width: 80%;
             margin-bottom: 20px;
             text-align: center;
+        }
+
+        /* --- MODAL (Biztosan ez a válaszod?) --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            border: 4px solid #00acc1;
+        }
+
+        .modal-answer-preview {
+            font-size: 1.8em;
+            color: #006064;
+            font-weight: bold;
+            margin: 20px 0;
+            background: #e0f7fa;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .btn-modal-yes {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .btn-modal-no {
+            background-color: #f44336;
+            color: white;
         }
 
         /* --- KÖZÖS STÍLUSOK --- */
@@ -185,7 +237,14 @@
             background: #333;
         }
 
-        /* --- GOMBOK --- */
+        /* --- NAVIGÁCIÓS GOMBOK --- */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
         button {
             border: none;
             padding: 12px 25px;
@@ -196,7 +255,6 @@
             transition: all 0.2s;
             margin: 5px;
             -webkit-appearance: none;
-            appearance: none;
             touch-action: manipulation;
         }
 
@@ -209,9 +267,38 @@
             margin-top: 20px;
         }
 
-        .btn-check {
+        .btn-resume {
+            background-color: #ff9800;
+            color: white;
+            width: 100%;
+            max-width: 300px;
+            font-size: 1.3em;
+            margin-top: 10px;
+        }
+
+        .btn-reset {
+            background-color: #607d8b;
+            color: white;
+            font-size: 1em;
+            margin-top: 20px;
+        }
+
+        .btn-prev {
+            background-color: #78909c;
+            color: white;
+            width: 48%;
+        }
+
+        .btn-next {
             background-color: #00bcd4;
             color: white;
+            width: 48%;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         .btn-send {
@@ -279,7 +366,7 @@
             color: #3e2723;
         }
 
-        /* --- EREDMÉNY KIEMELÉS STÍLUSOK --- */
+        /* --- EREDMÉNY KIEMELÉS --- */
         .summary-box {
             background: #e8f5e9;
             border: 4px solid #43a047;
@@ -298,7 +385,6 @@
             padding-bottom: 10px;
         }
 
-        /* Itt történik a méret beállítás */
         .grade-label {
             font-size: 1rem;
             color: #666;
@@ -309,17 +395,45 @@
 
         .grade-value {
             font-size: 5rem;
-            /* Nagyon nagy szám */
             font-weight: 900;
             color: #2e7d32;
             line-height: 1;
+        }
+
+        /* ÚJ: Resume terület */
+        #resume-area {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #new-game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>🦊 Törtmanó Teszt - Felmérő</h1>
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Biztosan ez a válaszod?</h3>
+            <p>Ezt a választ adtad meg:</p>
+            <div id="modal-answer-display" class="modal-answer-preview"></div>
+            <p style="font-size: 0.9em; color: #666;">Ha rányomsz az Igen-re, elmentjük és lépünk tovább. Ha Nem,
+                javíthatsz.</p>
+            <div class="modal-buttons">
+                <button class="btn-modal-no" onclick="closeModal(false)">❌ Nem, javítom</button>
+                <button class="btn-modal-yes" onclick="closeModal(true)">✅ Igen, tovább</button>
+            </div>
+        </div>
+    </div>
+
+    <h1>🦊 Törtmanó Teszt</h1>
 
     <div class="container">
 
@@ -328,17 +442,22 @@
 
             <div class="warning-box">
                 <h3>❗ Pontozási Szabályok ❗</h3>
-                <p>Ez a teszt **16 feladatot** tartalmaz. Minden feladatnál hibátlan válasz esetén jár a maximális
-                    pontszám.</p>
+                <p>Ez a teszt **16 feladatot** tartalmaz.</p>
                 <p>A maximális pontok: **Alap A/K (4p), Vegyes A/K (5p), M/O (4p), Zárójeles (6p)**.</p>
-                <p>Pontlevonás jár:</p>
-                <ul>
-                    <li>Ha az eredmény nincs **egyszerűsítve** (ha lehet): **-1 pont**.</li>
-                    <li>Ha az eredmény nincs **vegyes számmá** alakítva (ha lehet): **-1 pont**.</li>
-                </ul>
+                <p>Pontlevonás jár a hiányzó egyszerűsítésért és vegyes szám alakításért.</p>
+                <p style="margin-top:10px; border-top: 1px solid #f57f17; padding-top:5px;">💡 Ha véletlenül bezárod az
+                    ablakot, visszajöhetsz és folytathatod!</p>
             </div>
 
-            <form id="login-form" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div id="resume-area">
+                <h3 style="color:#e65100;">Találtam egy félbehagyott tesztet!</h3>
+                <p>Tanuló: <strong id="resume-name"></strong></p>
+                <p>Feladat: <strong id="resume-progress"></strong></p>
+                <button class="btn-resume" onclick="resumeGame()">▶️ Folytatás innen</button>
+                <button class="btn-reset" onclick="resetAndStartNew()">🗑️ Nem én vagyok / Újrakezdés</button>
+            </div>
+
+            <form id="new-game-area" style="width: 100%;">
                 <input type="text" id="name-input" placeholder="Írd ide a neved..." required>
                 <button type="submit" class="btn-start">Teszt indítása</button>
             </form>
@@ -355,17 +474,6 @@
 
             <div class="problem-container" id="problem-box"></div>
 
-            <div id="review-feedback"
-                style="display:none; text-align: left; background-color: #e3f2fd; border: 2px solid #03a9f4; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
-                <h3 style="color:#01579b; margin-top:0;">📊 Visszajelzés a feladatról</h3>
-                <p><strong>Felhasználó Válasza:</strong> <span id="review-user-answer"></span></p>
-                <p><strong>Helyes Megoldás:</strong> <span id="review-correct-answer"
-                        style="font-weight: bold; color: #009688;"></span></p>
-                <p><strong>Pontszám:</strong> <span id="review-score-display"
-                        style="font-size: 1.1em; font-weight: bold;"></span></p>
-                <p><strong>Részletek:</strong> <span id="review-notes"></span></p>
-            </div>
-
             <div class="answer-section" id="answer-input-section">
                 <div class="input-row">
                     <span style="font-size: 2em;">=</span>
@@ -378,11 +486,10 @@
                 </div>
             </div>
 
-            <button class="btn-check" onclick="submitAnswer()" id="submit-btn"
-                style="width: 100%; max-width: 300px;">Válasz Beküldése ➡️</button>
-            <button class="btn-check" onclick="continueToNext()" id="continue-btn"
-                style="width: 100%; max-width: 300px; display: none; background-color: #8bc34a;">Tovább a következőre
-                ➡️</button>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevProblem()" id="btn-prev">⬅️ Előző</button>
+                <button class="btn-next" onclick="attemptNext()" id="btn-next">Következő ➡️</button>
+            </div>
 
         </div>
 
@@ -427,47 +534,34 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymo37p92s9saK9CX7QSr-heJFpsVuJ0xxuV3aCLDZdRr1nahmDwVr-gFJ9DI94uzH2lw/exec";
         // ==========================================================
 
-        // --- TESZT ÁLLAPOT VÁLTOZÓK ---
         let studentName = "";
         let startTime;
-        let sessionLog = [];
-        let currentProblemText = "";
-        let currentSolution = null;
-        let reportDataPackage = null;
+        let testData = [];
+        let currentIndex = 0;
+        const STORAGE_KEY = "tortmano_save_v1"; // A kulcs a böngésző memóriájához
 
-        // --- TESZT SPECIFIKUS KONFIG ---
-        let currentQuestionIndex = 0;
-
-        // --- RÖGZÍTETT FELADATSOR (16 db) ---
-        const PROBLEM_QUEUE = [
+        // --- FELADAT DEFINÍCIÓK ---
+        const PROBLEM_DEFINITIONS = [
             { id: 1, type: 'AddSubSimple', ops: ['+'], count: 1, diff: '2', brackets: false, forceMixedInput: false, desc: 'Tört + Tört (1 műv)' },
             { id: 2, type: 'AddSubSimple', ops: ['-'], count: 1, diff: '2', brackets: false, forceMixedInput: false, desc: 'Tört - Tört (1 műv)' },
             { id: 3, type: 'AddSubSimple', ops: ['+', '-'], count: 2, diff: '2', brackets: false, forceMixedInput: false, desc: 'Vegyes (+/-) (2 műv)' },
             { id: 4, type: 'AddSubSimple', ops: ['+', '-'], count: 2, diff: '2', brackets: false, forceMixedInput: false, desc: 'Vegyes (+/-) (2 műv)' },
-
             { id: 5, type: 'AddSubMixed', ops: ['+'], count: 1, diff: '2', brackets: false, forceMixedInput: true, desc: 'Vegyes Tört + Vegyes Tört' },
             { id: 6, type: 'AddSubMixed', ops: ['-'], count: 1, diff: '2', brackets: false, forceMixedInput: true, desc: 'Vegyes Tört - Vegyes Tört' },
-
             { id: 7, type: 'MultDivInt', ops: ['*'], count: 1, diff: '2', brackets: false, forceInteger: true, desc: 'Tört * Egész (1 műv)' },
             { id: 8, type: 'MultDivInt', ops: ['/'], count: 1, diff: '2', brackets: false, forceInteger: true, desc: 'Tört / Egész (1 műv)' },
-
             { id: 9, type: 'MultDivSimple', ops: ['*'], count: 1, diff: '2', brackets: false, desc: 'Tört * Tört (1 műv)' },
             { id: 10, type: 'MultDivSimple', ops: ['*'], count: 1, diff: '2', brackets: false, desc: 'Tört * Tört (1 műv)' },
             { id: 11, type: 'MultDivSimple', ops: ['/'], count: 1, diff: '2', brackets: false, desc: 'Tört : Tört (1 műv)' },
             { id: 12, type: 'MultDivSimple', ops: ['/'], count: 1, diff: '2', brackets: false, desc: 'Tört : Tört (1 műv)' },
-
-            // Zárójeles feladatok (Az innerOp a bracketed op. Az outer op az ops[0])
             { id: 13, type: 'Brackets', ops: ['*'], count: 2, brackets: true, innerOp: ['+'], diff: '2', desc: 'Tört * (Összeadás)' },
             { id: 14, type: 'Brackets', ops: ['*'], count: 2, brackets: true, innerOp: ['-'], diff: '2', desc: 'Tört * (Kivonás)' },
             { id: 15, type: 'Brackets', ops: ['/'], count: 2, brackets: true, innerOp: ['+'], diff: '2', desc: 'Tört : (Összeadás)' },
             { id: 16, type: 'Brackets', ops: ['/'], count: 2, brackets: true, innerOp: ['-'], diff: '2', desc: 'Tört : (Kivonás)' }
         ];
-        const TOTAL_QUESTIONS = PROBLEM_QUEUE.length;
-
 
         // --- MATEMATIKA ---
         function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
-
         class Fraction {
             constructor(n, d) {
                 if (d < 0) { n = -n; d = -d; }
@@ -497,477 +591,417 @@
             }
         }
 
-        // --- BELÉPÉS ---
-        function enterGame() {
-            const nameInput = document.getElementById('name-input').value.trim();
-            if (nameInput === "") {
-                alert("Kérlek írd be a neved!");
-                return;
-            }
-            if (document.activeElement) { document.activeElement.blur(); }
-
-            studentName = nameInput;
-            startTime = new Date();
-
-            document.getElementById('display-name').innerText = studentName;
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            document.getElementById('report-screen').style.display = 'none';
-
-            currentQuestionIndex = 0;
-            sessionLog = [];
-            generateProblem();
-        }
-
         // --- SEGÉDFÜGGVÉNYEK ---
-        function getSettingsDescription(problem) {
-            let desc = problem.desc;
-            if (problem.brackets) desc += " (Zárójeles)";
-            if (problem.count > 1) desc += ` (${problem.count} műv)`;
-            return desc;
-        }
-
-        // SZÁMGENERÁLÁS (JAVÍTOTT: 0 és 1 kizárva)
         function getRandomFraction(diff, forceInteger = false, forceMixed = false) {
             let maxNum = diff === '1' ? 5 : (diff === '2' ? 12 : 20);
             const denoms = diff === '1' ? [2, 3, 4, 5, 10] : [2, 3, 4, 5, 6, 8, 9, 10, 12, 15];
-
             let n, d;
-
-            // 1. Egész szám generálása (Tört * Egész-hez)
             if (forceInteger) {
                 d = 1;
-                // n >= 2 kell legyen (hogy ne legyen 1 a szorzó/osztó)
                 n = Math.floor(Math.random() * (maxNum - 1)) + 2;
                 return new Fraction(n, 1);
             }
-
-            // 2. Normál tört generálása
             d = denoms[Math.floor(Math.random() * denoms.length)];
-
             if (forceMixed) {
-                // Vegyes számnál n > d kell, hogy legyen egész rész
-                do {
-                    n = Math.floor(Math.random() * (d * 3)) + 1;
-                } while (n === 0 || n <= d);
-                // n<=d kizárja az 1-et is (d/d=1), és azt is, hogy ne legyen egész része
+                do { n = Math.floor(Math.random() * (d * 3)) + 1; } while (n === 0 || n <= d);
             } else {
-                // Sima törtnél
-                do {
-                    n = Math.floor(Math.random() * (d * 2)) + 1;
-                } while (n === 0 || n === d); // n=d (érték=1) nem lehet
+                do { n = Math.floor(Math.random() * (d * 2)) + 1; } while (n === 0 || n === d);
             }
-
             return new Fraction(n, d);
         }
 
-        // --- PONTOZÁS LOGIKA ---
-        function calculatePoints(userVal, correctVal, problemType, wInput, nInput, dInput) {
-            let score = 0;
-            let maxPoints = 0;
-            let note = "";
+        // --- ADATGENERÁLÁS & MENTÉS ---
+        function generateTestData() {
+            testData = [];
+            PROBLEM_DEFINITIONS.forEach((def) => {
+                let numbers = [];
+                let operators = [...def.ops];
 
-            if (problemType.includes('AddSubSimple')) { maxPoints = 4; }
-            else if (problemType.includes('AddSubMixed')) { maxPoints = 5; }
-            else if (problemType.includes('MultDiv')) { maxPoints = 4; }
-            else if (problemType === 'Brackets') { maxPoints = 6; }
-            else { maxPoints = 4; }
-
-            const isMathCorrect = (userVal.n * correctVal.d === correctVal.n * userVal.d);
-
-            if (!isMathCorrect) {
-                note = "Helytelen matematikai érték. (0 pont)";
-                return { score: 0, max: maxPoints, note: note };
-            }
-
-            score = maxPoints;
-
-            // Egyszerűsítés ellenőrzése
-            const isUserSimplified = userVal.n === userVal.simplify().n;
-
-            if (!isUserSimplified) {
-                score -= 1;
-                note += " Hiányzik az egyszerűsítés (-1 pont).";
-            } else {
-                note += " Egyszerűsítés OK. ";
-            }
-
-            // Vegyes szám alakítás ellenőrzése
-            const needsMixed = Math.abs(correctVal.n) > correctVal.d && correctVal.d !== 1;
-            const isUserMixed = wInput !== 0 && Math.abs(nInput) < dInput && dInput !== 0;
-
-            if (needsMixed) {
-                if (!isUserMixed) {
-                    score -= 1;
-                    note += " Hiányzik a vegyes számmá alakítás (-1 pont).";
+                if (def.forceMixedInput) {
+                    numbers.push(getRandomFraction(def.diff, false, true));
+                    numbers.push(getRandomFraction(def.diff, false, true));
+                } else if (def.forceInteger) {
+                    numbers.push(getRandomFraction(def.diff, false, false));
+                    numbers.push(getRandomFraction(def.diff, true, false));
+                } else if (def.brackets) {
+                    numbers.push(getRandomFraction(def.diff, false, false));
+                    let f1 = getRandomFraction(def.diff, false, false);
+                    let f2 = getRandomFraction(def.diff, false, false);
+                    if (def.innerOp && def.innerOp[0] === '-' && f1.n * f2.d < f2.n * f1.d) { [f1, f2] = [f2, f1]; }
+                    numbers.push(f1);
+                    numbers.push(f2);
+                    operators = [def.ops[0], def.innerOp[0]];
                 } else {
-                    note += " Vegyes szám OK. ";
+                    for (let i = 0; i <= def.count; i++) numbers.push(getRandomFraction(def.diff, false, false));
                 }
-            } else {
-                note += " Vegyes szám nem szükséges. ";
-            }
 
-            if (score < 0) score = 0;
+                // Megoldás kiszámolása (objektumként tároljuk majd a mentés miatt)
+                let workNums = [...numbers];
+                let workOps = [...operators];
+                const performOp = (f1, f2, op) => {
+                    switch (op) {
+                        case '+': return f1.add(f2); case '-': return f1.sub(f2);
+                        case '*': return f1.mult(f2); case '/': return f1.div(f2);
+                        default: return f1;
+                    }
+                };
+                if (def.brackets) {
+                    let res = performOp(workNums[1], workNums[2], workOps[1]);
+                    workNums.splice(1, 2, res); workOps.splice(1, 1);
+                }
+                let k = 0;
+                while (k < workOps.length) {
+                    if (workOps[k] === '*' || workOps[k] === '/') {
+                        let res = performOp(workNums[k], workNums[k + 1], workOps[k]);
+                        workNums.splice(k, 2, res); workOps.splice(k, 1);
+                    } else { k++; }
+                }
+                while (workOps.length > 0) {
+                    let res = performOp(workNums[0], workNums[1], workOps[0]);
+                    workNums.splice(0, 2, res); workOps.shift();
+                }
 
-            return { score: score, max: maxPoints, note: note.trim() };
+                testData.push({
+                    def: def,
+                    numbers: numbers, // Fraction Objects
+                    operators: operators,
+                    correctSolution: workNums[0], // Fraction Object
+                    userW: '', userN: '', userD: ''
+                });
+            });
+
+            saveState(); // Azonnal mentjük
         }
 
+        // --- MENTÉS ÉS VISSZATÖLTÉS (LocalStorage) ---
+        function saveState() {
+            const state = {
+                studentName: studentName,
+                startTime: startTime.getTime(),
+                testData: testData, // Ez automatikusan JSON lesz (a Fraction objektumokból {n:.., d:..} lesz)
+                currentIndex: currentIndex
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
 
-        // --- FELADAT GENERÁLÁSA ---
-        function generateProblem() {
-            currentQuestionIndex++;
-            const problem = PROBLEM_QUEUE[currentQuestionIndex - 1];
+        function loadState() {
+            const json = localStorage.getItem(STORAGE_KEY);
+            if (!json) return false;
 
-            document.getElementById('progress-text').innerText = `${currentQuestionIndex} / ${TOTAL_QUESTIONS}. feladat`;
-            document.getElementById('inp-whole').value = '';
-            document.getElementById('inp-num').value = '';
-            document.getElementById('inp-denom').value = '';
+            try {
+                const state = JSON.parse(json);
+                studentName = state.studentName;
+                startTime = new Date(state.startTime);
+                currentIndex = state.currentIndex;
 
-            // Reset UI
-            document.getElementById('review-feedback').style.display = 'none';
-            document.getElementById('continue-btn').style.display = 'none';
-            document.getElementById('answer-input-section').style.display = 'flex';
-            document.getElementById('submit-btn').style.display = 'block';
-
-            const btn = document.getElementById('submit-btn');
-            if (currentQuestionIndex === TOTAL_QUESTIONS) {
-                btn.innerText = "Teszt Befejezése és Eredményezés ✅";
-                btn.style.backgroundColor = "#d32f2f";
-            } else {
-                btn.innerText = "Válasz Beküldése ➡️";
-                btn.style.backgroundColor = "#00bcd4";
+                // REKONSTRUKCIÓ: A JSON-ból visszajövő objektumokat vissza kell alakítani Fraction osztállyá!
+                testData = state.testData.map(item => {
+                    // Számok visszaállítása
+                    item.numbers = item.numbers.map(num => new Fraction(num.n, num.d));
+                    // Megoldás visszaállítása
+                    item.correctSolution = new Fraction(item.correctSolution.n, item.correctSolution.d);
+                    return item;
+                });
+                return true;
+            } catch (e) {
+                console.error("Hiba a betöltésnél", e);
+                return false;
             }
+        }
 
-            const diff = problem.diff;
-            let operators = [...problem.ops];
-            let opCount = problem.count;
-            let numbers = [];
+        function clearState() {
+            localStorage.removeItem(STORAGE_KEY);
+        }
 
-            if (problem.forceMixedInput) {
-                numbers.push(getRandomFraction(diff, false, true));
-                numbers.push(getRandomFraction(diff, false, true));
-            }
-            else if (problem.forceInteger) {
-                numbers.push(getRandomFraction(diff, false, false));
-                numbers.push(getRandomFraction(diff, true, false));
-            }
-            else if (problem.brackets) {
-                numbers.push(getRandomFraction(diff, false, false)); // Külső szám
-
-                let f1 = getRandomFraction(diff, false, false);
-                let f2 = getRandomFraction(diff, false, false);
-
-                // Biztosítjuk, hogy a zárójelben ne legyen negatív eredmény, ha kivonás van
-                if (problem.innerOp && problem.innerOp[0] === '-' && f1.n * f2.d < f2.n * f1.d) {
-                    [f1, f2] = [f2, f1];
-                }
-
-                numbers.push(f1);
-                numbers.push(f2);
-                operators = [problem.ops[0], problem.innerOp[0]];
-            }
-            else {
-                for (let i = 0; i <= opCount; i++) {
-                    numbers.push(getRandomFraction(diff, false, false));
-                }
-            }
-
-            // HTML Generálás
+        // --- HTML RENDERELÉS ---
+        function renderProblemHtml(problemObj) {
             let html = "";
             let textLog = "";
             const displayOps = { '+': '+', '-': '-', '*': '·', '/': ':' };
+            const numbers = problemObj.numbers;
+            const operators = problemObj.operators;
+            const def = problemObj.def;
 
             for (let i = 0; i < numbers.length; i++) {
                 let currentNum = numbers[i];
                 let fractionHtml = "";
                 let fractionText = "";
 
-                if (problem.forceMixedInput && !currentNum.isInteger() && currentNum.n > currentNum.d) {
+                if (def.forceMixedInput && !currentNum.isInteger() && currentNum.n > currentNum.d) {
                     const mixed = currentNum.toMixed();
                     fractionHtml = `<span class="whole-number">${mixed.w}</span>`;
-                    fractionText = `${mixed.w}`;
                     if (mixed.n !== 0) {
                         fractionHtml += `<div class="fraction"><span class="numerator">${mixed.n}</span><span class="denominator">${mixed.d}</span></div>`;
-                        fractionText += ` ${mixed.n}/${mixed.d}`;
                     }
                 } else if (currentNum.isInteger()) {
                     fractionHtml = `<span class="whole-number">${currentNum.n}</span>`;
-                    fractionText = `${currentNum.n}`;
                 } else {
                     fractionHtml = `<div class="fraction"><span class="numerator">${currentNum.n}</span><span class="denominator">${currentNum.d}</span></div>`;
-                    fractionText = `${currentNum.n}/${currentNum.d}`;
                 }
 
-                if (problem.brackets && i === 1) {
-                    html += `<span class="bracket">(</span>`;
-                    textLog += "(";
-                }
-
+                if (def.brackets && i === 1) html += `<span class="bracket">(</span>`;
                 html += fractionHtml;
-                textLog += fractionText;
-
-                if (problem.brackets && i === 2) {
-                    html += `<span class="bracket">)</span>`;
-                    textLog += ")";
-                }
+                if (def.brackets && i === 2) html += `<span class="bracket">)</span>`;
 
                 if (i < numbers.length - 1) {
                     let opSymbol = "";
-
-                    if (problem.brackets) {
+                    if (def.brackets) {
                         if (i === 0) opSymbol = displayOps[operators[0]];
                         if (i === 1) opSymbol = displayOps[operators[1]];
                     } else {
                         if (i < operators.length) opSymbol = displayOps[operators[i]];
                     }
-
-                    if (opSymbol) {
-                        html += `<span class="operator">${opSymbol}</span>`;
-                        textLog += ` ${opSymbol} `;
-                    }
+                    if (opSymbol) html += `<span class="operator">${opSymbol}</span>`;
                 }
             }
-
-            document.getElementById('problem-box').innerHTML = html;
-            currentProblemText = textLog;
-
-            // Számolás
-            let workNums = [...numbers];
-            let workOps = [...operators];
-
-            const performOp = (f1, f2, op) => {
-                switch (op) {
-                    case '+': return f1.add(f2);
-                    case '-': return f1.sub(f2);
-                    case '*': return f1.mult(f2);
-                    case '/': return f1.div(f2);
-                    default: return f1;
-                }
-            };
-
-            if (problem.brackets) {
-                let f1 = workNums[1];
-                let f2 = workNums[2];
-                let op = workOps[1];
-                let res = performOp(f1, f2, op);
-                workNums.splice(1, 2, res);
-                workOps.splice(1, 1);
-            }
-
-            let k = 0;
-            while (k < workOps.length) {
-                if (workOps[k] === '*' || workOps[k] === '/') {
-                    let f1 = workNums[k];
-                    let f2 = workNums[k + 1];
-                    let op = workOps[k];
-                    let res = performOp(f1, f2, op);
-                    workNums.splice(k, 2, res);
-                    workOps.splice(k, 1);
-                } else { k++; }
-            }
-
-            while (workOps.length > 0) {
-                let f1 = workNums[0];
-                let f2 = workNums[1];
-                let op = workOps[0];
-                let res = performOp(f1, f2, op);
-                workNums.splice(0, 2, res);
-                workOps.shift();
-            }
-
-            currentSolution = workNums[0];
+            return html;
         }
 
-        // --- VISSZAJELZÉS ---
-        function showReview(logEntry) {
-            const reviewBox = document.getElementById('review-feedback');
-            const correctSolutionMixed = logEntry.correctAnswer;
+        // --- NAVIGÁCIÓ & UI LOGIKA ---
+        function loadQuestion(index) {
+            currentIndex = index;
+            const data = testData[index];
 
-            document.getElementById('answer-input-section').style.display = 'none';
-            document.getElementById('submit-btn').style.display = 'none';
-            document.getElementById('continue-btn').style.display = 'block';
-            reviewBox.style.display = 'block';
+            document.getElementById('progress-text').innerText = `${index + 1} / ${testData.length}. feladat`;
+            document.getElementById('problem-box').innerHTML = renderProblemHtml(data);
 
-            document.getElementById('review-user-answer').innerText = logEntry.userAnswer;
-            document.getElementById('review-correct-answer').innerText = correctSolutionMixed;
-            document.getElementById('review-score-display').innerHTML = `${logEntry.score} / ${logEntry.maxScore} pont (${logEntry.isCorrect ? '<span style="color: green;">Helyes forma</span>' : '<span style="color: red;">Hibás forma</span>'})`;
-            document.getElementById('review-notes').innerText = logEntry.note;
+            document.getElementById('inp-whole').value = data.userW;
+            document.getElementById('inp-num').value = data.userN;
+            document.getElementById('inp-denom').value = data.userD;
 
-            if (logEntry.problemIndex === TOTAL_QUESTIONS) {
-                document.getElementById('continue-btn').innerText = "Teszt Befejezése és Eredményezés ✅";
-            }
-        }
-
-        function continueToNext() {
-            if (currentQuestionIndex >= TOTAL_QUESTIONS) {
-                finishSession();
+            document.getElementById('btn-prev').disabled = (index === 0);
+            const nextBtn = document.getElementById('btn-next');
+            if (index === testData.length - 1) {
+                nextBtn.innerText = "Befejezés ✅";
+                nextBtn.style.backgroundColor = "#d32f2f";
             } else {
-                generateProblem();
+                nextBtn.innerText = "Válasz beküldése ➡️";
+                nextBtn.style.backgroundColor = "#00bcd4";
+            }
+
+            saveState(); // Minden lépésnél mentünk!
+        }
+
+        function saveCurrentAnswer() {
+            const data = testData[currentIndex];
+            data.userW = document.getElementById('inp-whole').value;
+            data.userN = document.getElementById('inp-num').value;
+            data.userD = document.getElementById('inp-denom').value;
+            saveState();
+        }
+
+        function prevProblem() {
+            saveCurrentAnswer();
+            if (currentIndex > 0) {
+                loadQuestion(currentIndex - 1);
             }
         }
 
-        // --- VÁLASZ BEKÜLDÉSE ---
-        function submitAnswer() {
-            const problem = PROBLEM_QUEUE[currentQuestionIndex - 1];
+        function attemptNext() {
+            let w = document.getElementById('inp-whole').value;
+            let n = document.getElementById('inp-num').value;
+            let d = document.getElementById('inp-denom').value;
 
-            let w = parseInt(document.getElementById('inp-whole').value) || 0;
-            let n = parseInt(document.getElementById('inp-num').value) || 0;
-            let dInput = document.getElementById('inp-denom').value;
-            let d = parseInt(dInput) || 1;
+            if (d === '' && n !== '') { alert("Kérlek adj meg nevezőt, ha törtet írtál be!"); return; }
+            if (d == 0 && d !== '') { alert("A nevező nem lehet nulla!"); return; }
 
-            if (dInput === '') {
-                if (n !== 0) {
-                    alert("Kérlek adj meg nevezőt, ha törtet írtál be!");
-                    return;
+            if (w === '' && n === '' && d === '') {
+                if (!confirm("Nem írtál be semmit. Biztosan tovább lépsz?")) return;
+            }
+
+            let userText = (w && !n) ? `${w}` : (w ? `${w} egész ${n}/${d}` : `${n}/${d}`);
+            if (!w && !n && !d) userText = "Üres válasz";
+
+            document.getElementById('modal-answer-display').innerText = userText;
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        function closeModal(confirmed) {
+            document.getElementById('confirm-modal').style.display = 'none';
+            if (confirmed) {
+                saveCurrentAnswer();
+                if (currentIndex < testData.length - 1) {
+                    loadQuestion(currentIndex + 1);
+                } else {
+                    finishGame();
                 }
-            } else if (dInput == 0) {
-                alert("A nevező nem lehet nulla!");
-                return;
             }
-
-            let totalNum = w * d + n;
-            const userValRaw = new Fraction(totalNum, d);
-            const correct = currentSolution;
-
-            const scoringResult = calculatePoints(userValRaw, correct, problem.type, w, n, d);
-
-            let userText = (w !== 0 && n === 0) ? `${w}` : (w !== 0 ? `${w} ${n}/${d}` : `${n}/${d}`);
-            if (n === 0 && w === 0) userText = "0";
-
-            let logEntry = {
-                problemIndex: currentQuestionIndex,
-                problemType: problem.type,
-                problem: currentProblemText,
-                userAnswer: userText,
-                correctAnswer: correct.toMixed().w !== 0 ? `${correct.toMixed().w} ${correct.toMixed().n}/${correct.toMixed().d}` : correct.toString(),
-                isCorrect: scoringResult.score === scoringResult.max,
-                score: scoringResult.score,
-                maxScore: scoringResult.max,
-                note: scoringResult.note,
-                settingsDesc: getSettingsDescription(problem)
-            };
-            sessionLog.push(logEntry);
-
-            showReview(logEntry);
         }
 
-        // --- RIPORT ÉS KÜLDÉS (OSZTÁLYZÁSSAL) ---
-        function finishSession() {
+        // --- START LOGIKA (Új vs Folytatás) ---
+        function enterGame() {
+            const nameInput = document.getElementById('name-input').value.trim();
+            if (nameInput === "") { alert("Kérlek írd be a neved!"); return; }
+
+            studentName = nameInput;
+            startTime = new Date();
+
+            clearState(); // Új játéknál töröljük a régit
+            generateTestData();
+
+            document.getElementById('display-name').innerText = studentName;
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            loadQuestion(0);
+        }
+
+        function resumeGame() {
+            document.getElementById('display-name').innerText = studentName;
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            loadQuestion(currentIndex);
+        }
+
+        function resetAndStartNew() {
+            if (confirm("Biztosan törlöd a mentett tesztet és újat kezdesz?")) {
+                clearState();
+                location.reload();
+            }
+        }
+
+        // --- INIT ---
+        window.onload = function () {
+            // Ellenőrizzük, van-e mentés
+            if (loadState()) {
+                document.getElementById('new-game-area').style.display = 'none';
+                document.getElementById('resume-area').style.display = 'flex';
+                document.getElementById('resume-name').innerText = studentName;
+                document.getElementById('resume-progress').innerText = `${currentIndex + 1}. feladat`;
+            } else {
+                document.getElementById('new-game-area').style.display = 'flex';
+                document.getElementById('resume-area').style.display = 'none';
+            }
+
+            document.getElementById('start-screen').style.display = 'flex';
+            document.getElementById('new-game-area').addEventListener('submit', function (e) {
+                e.preventDefault(); enterGame();
+            });
+        };
+
+        // --- KIÉRTÉKELÉS ---
+        function calculatePoints(userVal, correctVal, problemType, wInput, nInput, dInput) {
+            let maxPoints = 4;
+            if (problemType.includes('AddSubMixed')) maxPoints = 5;
+            if (problemType === 'Brackets') maxPoints = 6;
+
+            let note = "";
+            const isMathCorrect = (userVal.n * correctVal.d === correctVal.n * userVal.d);
+
+            if (!isMathCorrect) return { score: 0, max: maxPoints, note: "Helytelen érték. (0 pont)" };
+
+            let score = maxPoints;
+
+            if (userVal.n !== userVal.simplify().n) {
+                score -= 1; note += "Nincs egyszerűsítve (-1p). ";
+            }
+
+            const needsMixed = Math.abs(correctVal.n) > correctVal.d && correctVal.d !== 1;
+            const isUserMixed = wInput != 0 && Math.abs(nInput) < dInput && dInput != 0;
+            if (needsMixed && !isUserMixed) {
+                score -= 1; note += "Nincs vegyes számban (-1p). ";
+            }
+
+            if (score < 0) score = 0;
+            if (score === maxPoints) note = "Tökéletes!";
+
+            return { score: score, max: maxPoints, note: note.trim() };
+        }
+
+        function finishGame() {
+            clearState(); // Sikeres befejezéskor töröljük a mentést!
+
             const endTime = new Date();
-            const timeDiffMs = endTime - startTime;
-            const timeDiffMin = Math.round(timeDiffMs / 1000 / 60);
+            const timeDiffMin = Math.round((endTime - startTime) / 1000 / 60);
 
-            let totalScore = sessionLog.reduce((sum, log) => sum + log.score, 0);
-            let totalMaxScore = sessionLog.reduce((sum, log) => sum + log.maxScore, 0);
-            let scorePercent = totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
+            let totalScore = 0;
+            let totalMaxScore = 0;
+            let reportDetails = "";
 
-            // Érdemjegy számítása
+            testData.forEach((data, index) => {
+                let w = parseInt(data.userW) || 0;
+                let n = parseInt(data.userN) || 0;
+                let d = parseInt(data.userD) || 1;
+                let totalNum = w * d + n;
+
+                const userValRaw = new Fraction(totalNum, d);
+                const res = calculatePoints(userValRaw, data.correctSolution, data.def.type, w, n, d);
+
+                totalScore += res.score;
+                totalMaxScore += res.max;
+
+                let userText = (w !== 0 && n === 0) ? `${w}` : (w !== 0 ? `${w} ${n}/${d}` : `${n}/${d}`);
+                if (w === 0 && n === 0) userText = "0";
+                let correctText = data.correctSolution.toMixed().w !== 0 ?
+                    `${data.correctSolution.toMixed().w} ${data.correctSolution.toMixed().n}/${data.correctSolution.toMixed().d}` :
+                    data.correctSolution.toString();
+
+                reportDetails += `${index + 1}. Feladat (${res.score}/${res.max}p) - ${res.note}\n`;
+                reportDetails += `   Válasz: ${userText} | Helyes: ${correctText}\n`;
+            });
+
+            let scorePercent = Math.round((totalScore / totalMaxScore) * 100);
             let grade = 1;
             if (scorePercent >= 85) grade = 5;
             else if (scorePercent >= 70) grade = 4;
             else if (scorePercent >= 55) grade = 3;
             else if (scorePercent >= 40) grade = 2;
 
-            // UI Frissítés
             document.getElementById('game-screen').style.display = 'none';
             document.getElementById('report-screen').style.display = 'block';
 
             document.getElementById('final-score').innerText = totalScore;
             document.getElementById('final-max').innerText = totalMaxScore;
             document.getElementById('final-percent').innerText = scorePercent;
-            document.getElementById('final-grade').innerText = grade; // Csak a szám
+            document.getElementById('final-grade').innerText = grade;
 
-            // Riport szöveg
-            const uniqueSettings = ["Rögzített 16 feladatsor"];
-            let reportText = `TÖRTMANÓ TESZT JELENTÉS - ${studentName}\n`;
-            reportText += `--------------------------------\n`;
-            reportText += `ÉRDEMJEGY: ${grade}\n`;
-            reportText += `Eredmény: ${scorePercent}% (${totalScore}/${totalMaxScore} pont)\n`;
-            reportText += `Idő: ${timeDiffMin} perc\n`;
-            reportText += `--------------------------------\n\n`;
-            reportText += `Részletek:\n`;
-            sessionLog.forEach((log, index) => {
-                let status = log.isCorrect ? "✅ TÖKÉLETES" : "⚠️ HIBA";
-                reportText += `${index + 1}. ${status} (${log.score}/${log.maxScore} pont)\n`;
-                reportText += `   > Feladat: ${log.problem} = ${log.userAnswer}\n`;
-                reportText += `   > Pontozás: ${log.note}\n`;
-                if (log.score < log.maxScore) reportText += `   > Helyes forma: ${log.correctAnswer}\n`;
-            });
+            let reportText = `TÖRTMANÓ JELENTÉS - ${studentName}\n--------------------------------\n`;
+            reportText += `ÉRDEMJEGY: ${grade}\nEredmény: ${scorePercent}% (${totalScore}/${totalMaxScore} pont)\n`;
+            reportText += `Idő: ${timeDiffMin} perc\n--------------------------------\nRészletek:\n`;
+            reportText += reportDetails;
 
             document.getElementById('report-output').value = reportText;
 
             reportDataPackage = {
                 name: studentName,
-                grade: grade, // Új mező
+                grade: grade,
                 score: scorePercent,
                 totalScore: totalScore,
                 totalMaxScore: totalMaxScore,
                 time: timeDiffMin,
-                settings: uniqueSettings.join(', '),
+                settings: "Navigálható 16 feladatsor",
                 log: reportText
             };
 
-            const btnSend = document.getElementById('btn-send-data');
-            btnSend.style.display = 'block';
-
-            if (GOOGLE_SCRIPT_URL.includes("IDE_MASOLD_BE_A_GOOGLE_SCRIPT_LINKET") || GOOGLE_SCRIPT_URL === "") {
-                document.getElementById('status-message').innerHTML = "⚠️ Nincs beállítva a tanári link! Használd a másolást.";
-                document.getElementById('status-message').style.color = "red";
-                btnSend.style.display = 'none';
-            }
+            document.getElementById('btn-send-data').style.display = 'block';
         }
 
         function sendReportToGoogle() {
             const btn = document.getElementById('btn-send-data');
             const statusDiv = document.getElementById('status-message');
-
             btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> Küldés folyamatban...';
-            statusDiv.innerText = "";
+            btn.innerHTML = '<span class="loading-spinner"></span> Küldés...';
 
             fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                method: "POST", mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(reportDataPackage)
-            })
-                .then(response => {
-                    statusDiv.innerHTML = "✅ Sikeresen elküldve! Köszönöm a munkát.";
-                    statusDiv.style.color = "green";
-                    btn.style.display = 'none';
-                })
-                .catch(error => {
-                    console.error("Hiba:", error);
-                    statusDiv.innerHTML = "❌ Hiba történt a küldéskor. Kérlek másold ki a lenti szöveget és küldd el!";
-                    statusDiv.style.color = "red";
-                    btn.innerHTML = "Újrapróbálkozás";
-                    btn.disabled = false;
-                });
+            }).then(() => {
+                statusDiv.innerHTML = "✅ Sikeresen elküldve!";
+                statusDiv.style.color = "green";
+                btn.style.display = 'none';
+            }).catch(error => {
+                statusDiv.innerHTML = "❌ Hiba. Másold ki a lenti szöveget!";
+                statusDiv.style.color = "red";
+                btn.disabled = false;
+            });
         }
 
         function copyReport() {
-            const reportOutput = document.getElementById('report-output');
-            reportOutput.select();
-            reportOutput.setSelectionRange(0, 99999);
+            const r = document.getElementById('report-output');
+            r.select(); r.setSelectionRange(0, 99999);
             document.execCommand("copy");
-            alert("✅ A jelentés másolva!");
+            alert("✅ Másolva!");
         }
-
-        window.onload = function () {
-            document.getElementById('start-screen').style.display = 'flex';
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('report-screen').style.display = 'none';
-
-            const loginForm = document.getElementById('login-form');
-            if (loginForm) {
-                loginForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    enterGame();
-                });
-            }
-        };
     </script>
 </body>
 
