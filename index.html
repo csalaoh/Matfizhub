@@ -191,6 +191,83 @@
                 padding: 20px;
             }
         }
+
+        /* --- KAPCSOLAT ŰRLAP STÍLUS --- */
+        .contact-section {
+            max-width: 700px;
+            /* Ne legyen túl széles az űrlap */
+            margin: 50px auto;
+            /* Középre igazítás */
+        }
+
+        .contact-form {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            /* Nem tesszük rá a hover effektet (mozgást), mert gépelés közben zavaró lenne */
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+            /* Hogy a padding ne növelje a szélességet */
+            transition: border-color 0.3s;
+            background-color: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-grad-start);
+            /* Kék fókusz szín */
+            background-color: #fff;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+            /* Csak függőlegesen lehessen átméretezni */
+        }
+
+        .btn-submit {
+            background: linear-gradient(90deg, var(--primary-grad-start), var(--primary-grad-end));
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            /* Mobilbarát szélesség */
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 242, 254, 0.6);
+        }
     </style>
 </head>
 
@@ -250,12 +327,34 @@
             </a>
 
         </div>
-        <form name="kapcsolat" method="POST" netlify>
-            <label>Név: <input type="text" name="nev" /></label>
-            <label>Email: <input type="email" name="email" /></label>
-            <label>Üzenet: <textarea name="uzenet"></textarea></label>
-            <button type="submit">Küldés</button>
-        </form>
+        <h2 class="section-title">✉️ Kapcsolat</h2>
+
+        <div class="contact-section">
+            <form class="contact-form" name="kapcsolat" method="POST" netlify>
+
+                <div class="form-group">
+                    <label for="nev">Név:</label>
+                    <input type="text" id="nev" name="nev" placeholder="Írd be a neved" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email cím:</label>
+                    <input type="email" id="email" name="email" placeholder="pelda@email.hu" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="uzenet">Üzenet:</label>
+                    <textarea id="uzenet" name="uzenet" placeholder="Miben segíthetünk?" required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">Küldés</button>
+
+            </form>
+        </div>
+
+    </div> ```
+
+
     </div>
 
     <footer>
