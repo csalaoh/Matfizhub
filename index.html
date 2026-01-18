@@ -452,6 +452,46 @@
             <button id="closeModalBtn" class="btn-modal">Rendben</button>
         </div>
     </div>
+    <script>
+        const form = document.querySelector("form[name='kapcsolat']");
+        const modal = document.getElementById("sikeresModal");
+        const closeBtn = document.getElementById("closeModalBtn");
+
+        // Űrlap küldésének kezelése
+        form.addEventListener("submit", (e) => {
+            e.preventDefault(); // Megállítjuk az oldal újratöltését
+
+            // Adatok összegyűjtése a Netlify számára
+            const formData = new FormData(form);
+
+            fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams(formData).toString(),
+            })
+                .then(() => {
+                    // Ha sikeres a küldés:
+                    modal.classList.add("show"); // Megjelenítjük az ablakot
+                    form.reset(); // Kitöröljük az űrlap mezőit
+                })
+                .catch((error) => {
+                    alert("Hiba történt a küldéskor. Kérlek próbáld újra!");
+                    console.error(error);
+                });
+        });
+
+        // Bezárás gomb funkciója
+        closeBtn.addEventListener("click", () => {
+            modal.classList.remove("show");
+        });
+
+        // Ha a sötét háttérre kattintanak, akkor is záródjon be
+        window.addEventListener("click", (e) => {
+            if (e.target == modal) {
+                modal.classList.remove("show");
+            }
+        });
+    </script>
 </body>
 
 </html>
