@@ -413,7 +413,8 @@
         <h2 class="section-title">✉️ Kapcsolat</h2>
 
         <div class="contact-section">
-            <form class="contact-form" name="kapcsolat" method="POST" netlify>
+            <form class="contact-form" name="kapcsolat" method="POST" data-netlify="true">
+                <input type="hidden" name="form-name" value="kapcsolat" />
 
                 <div class="form-group">
                     <label for="nev">Név:</label>
